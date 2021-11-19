@@ -1,0 +1,337 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "description": "API that returns a step list of graph algorithm operation.",
+    "version": "1.0.0",
+    "title": "Graph-API",
+    "contact": {
+      "email": "paweldekowski@mat.umk.pl"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "paths": {
+    "/api/BFS": {
+        "post": {
+          "tags": [
+            "Search algorithms"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "BFS",
+              "required": true,
+              "description": "Returns a step list of BFS",
+              "schema": {
+                "$ref": "#/components/schemas/graph_input"
+              },
+              "examples": {
+                "graph": {
+                  "value": {
+                    "start_vertex": 0,
+                    "vertices": [
+                      0, 1, 2, 3, 4, 5
+                    ],
+                    "adjacency_list": [
+                      [
+                        2
+                      ],
+                      [
+                          2, 3
+                      ],
+                      [
+                          0, 1, 3, 4
+                      ],
+                      [
+                          1, 2, 5
+                      ],
+                      [
+                          2, 5
+                      ],
+                      [
+                          3, 4
+                      ]
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/graph_input"
+                },
+                "examples": {
+                  "graph": {
+                    "value": {
+                      "start_vertex": 0,
+                      "vertices": [
+                        0, 1, 2, 3, 4, 5
+                      ],
+                      "adjacency_list": [
+                        [
+                          2
+                        ],
+                        [
+                            2, 3
+                        ],
+                        [
+                            0, 1, 3, 4
+                        ],
+                        [
+                            1, 2, 5
+                        ],
+                        [
+                            2, 5
+                        ],
+                        [
+                            3, 4
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Returns a step list of BFS",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "$ref": "#/components/schemas/BFS_output"
+              }
+            }
+          }
+        }
+    },
+    "/api/DFS": {
+        "post": {
+          "tags": [
+            "Search algorithms"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "DFS",
+              "required": true,
+              "description": "Returns a step list of DFS",
+              "schema": {
+                "$ref": "#/components/schemas/graph_input"
+              },
+              "examples": {
+                "graph": {
+                  "value": {
+                    "start_vertex": 0,
+                    "vertices": [
+                      0, 1, 2, 3, 4, 5
+                    ],
+                    "adjacency_list": [
+                      [
+                        2
+                      ],
+                      [
+                          2, 3
+                      ],
+                      [
+                          0, 1, 3, 4
+                      ],
+                      [
+                          1, 2, 5
+                      ],
+                      [
+                          2, 5
+                      ],
+                      [
+                          3, 4
+                      ]
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/graph_input"
+                },
+                "examples": {
+                  "graph": {
+                    "value": {
+                      "start_vertex": 0,
+                      "vertices": [
+                        0, 1, 2, 3, 4, 5
+                      ],
+                      "adjacency_list": [
+                        [
+                          2
+                        ],
+                        [
+                            2, 3
+                        ],
+                        [
+                            0, 1, 3, 4
+                        ],
+                        [
+                            1, 2, 5
+                        ],
+                        [
+                            2, 5
+                        ],
+                        [
+                            3, 4
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Returns a step list of DFS",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "$ref": "#/components/schemas/DFS_output"
+              }
+            }
+          }
+        }
+    }
+  },
+  "components": {
+    "schemas": {
+      "vertex": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "neighbours": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/vertex"
+        }
+      },
+      "graph_input": {
+        "type": "object",
+        "properties": {
+          "vertices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          },
+          "adjacency_list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/neighbours"
+            }
+          },
+          "start_vertex": {
+            "$ref": "#/components/schemas/vertex"
+          }
+        }
+      },
+      "BFS_step": {
+        "type": "object",
+        "properties": {
+          "vertices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          },
+          "adjacency_list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/neighbours"
+            }
+          },
+          "current_vertex": {
+            "$ref": "#/components/schemas/vertex"
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "visited": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "queue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          }
+        }
+      },
+      "BFS_output": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BFS_step"
+        }
+      },
+      "DFS_step": {
+        "type": "object",
+        "properties": {
+          "vertices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          },
+          "adjacency_list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/neighbours"
+            }
+          },
+          "current_vertex": {
+            "$ref": "#/components/schemas/vertex"
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "visited": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "stack": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          }
+        }
+      },
+      "DFS_output": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DFS_step"
+        }
+      }
+    }
+  }
+}
