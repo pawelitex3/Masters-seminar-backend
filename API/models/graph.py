@@ -44,11 +44,13 @@ class SearchGraph(Graph):
             self.current_vertex = self.collection.get()
             current_vertex_index = self.vertices.index(self.current_vertex)
             neighbours = self.adjacency_list[current_vertex_index]
+            #TODO: informacja, że przetwarzany jest pierwszy element z kolejki
             self.add_to_step_list(step_number)
 
             for neighbour in neighbours:
                 current_neighbour_index = self.vertices.index(neighbour)
                 if self.visited[current_neighbour_index] == 0:
+                    # TODO: informacja, że do kolejki zostały dodane nowe wierzchołki
                     self.collection.put(neighbour)
                     self.visited[current_neighbour_index] = 1
                     self.parents[current_neighbour_index] = self.current_vertex
