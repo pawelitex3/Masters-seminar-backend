@@ -191,3 +191,41 @@ class PrimDijkstraGraph(MinimumSpinningTreeGraph):
 
         return edges
 
+
+class ShortestPathsGraph(Graph):
+    def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
+        super().__init__(vertices, adjacency_list, current_vertex)
+        self.weights = weights
+        self.parents = [-1 for _ in range(len(self.vertices))]
+        self.costs = [float('inf') for _ in range(len(self.vertices))]
+        self.steps = list()
+
+
+class DijkstraGraph(ShortestPathsGraph):
+    def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
+        super().__init__(vertices, adjacency_list, weights, current_vertex)
+        self.visited = [-1 for _ in range(len(self.vertices))]
+
+    def find_shortest_paths(self):
+        self.costs[self.current_vertex] = 0
+        for vertex in self.adjacency_list[self.current_vertex]:
+            print(f"{self.current_vertex}, {vertex}")
+            vertex_index = self.adjacency_list[self.current_vertex].index(vertex)
+            self.costs[vertex] = self.weights[self.current_vertex][vertex_index]
+            self.parents[vertex] = self.current_vertex
+        self.visited[self.current_vertex] = 1
+
+        while self.visited.count(-1) > 0:
+            min_cost_vertex = self.visited.index(-1)
+            for i in range(min_cost_vertex+1, len(self.vertices)):
+                if self.visited[i] == -1 and self.costs[i] < self.costs[min_cost_vertex]:
+                    min_cost_vertex = i
+            for neighbour in self.adjacency_list[min_cost_vertex]:
+                if self.visited[neighbour] == -1:
+                    neighbour_index = self.adjacency_list[min_cost_vertex].index(neighbour)
+                    if self.costs[neighbour] > self.costs[min_cost_vertex] + self.weights[min_cost_vertex][neighbour_index]:
+                        self.costs[neighbour] = self.costs[min_cost_vertex] + self.weights[min_cost_vertex][neighbour_index]
+                        self.parents[neighbour] = min_cost_vertex
+                self.visited[min_cost_vertex] = 1
+
+        print(self.parents)
