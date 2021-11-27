@@ -4,6 +4,13 @@ class Edge:
         self.end = end
         self.weight = weight
 
+    def serialize(self):
+        return {
+            "start": self.start,
+            "end": self.end,
+            "weight": self.weight
+        }
+
 
 def edge_sort(edge):
     return edge.weight

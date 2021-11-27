@@ -75,34 +75,20 @@ class DFSGraph(SearchGraph):
 
 
 class MinimumSpinningTreeGraph(Graph):
-    def __init__(self, vertices=None, adjacency_list=None, current_vertex=0, weights=None):
-        super().__init__(vertices, adjacency_list, current_vertex)
+    def __init__(self, vertices=None, adjacency_list=None, weights=None):
+        super().__init__(vertices, adjacency_list)
         self.weights = weights
         self.edge_list = list()
-        self.create_edge_list()
         self.parents = [-1 for _ in range(len(self.vertices))]
+        self.minimum_spinning_tree_edges = list()
+        self.steps = list()
+
+        self.create_edge_list()
 
     def create_edge_list(self):
-        for i in len(self.adjacency_list):
-            for j in len(self.adjacency_list[i]):
-                self.edge_list.append(Edge(i, j, self.weights[i][j]))
-
-
-class KruskalGraph(MinimumSpinningTreeGraph):
-    def __init__(self, vertices=None, adjacency_list=None, current_vertex=0, weights=None):
-        super().__init__(vertices, adjacency_list, current_vertex, weights)
-        self.edge_list.sort(key=edge_sort)
-        self.minimum_spinning_tree_edges = list()
-
-    def find_minimum_spinning_tree(self):
-        for edge in self.edge_list:
-            vertex1, vertex2 = edge
-            parent1, parent2 = self.find_representative(vertex1), self.find_representative(vertex2)
-            if parent1 != parent2:
-                self.parents[parent2] = parent1
-                self.minimum_spinning_tree_edges.append(edge)
-                if len(self.minimum_spinning_tree_edges) == self.vertices-1:
-                    break
+        for i in range(len(self.adjacency_list)):
+            for j in range(len(self.adjacency_list[i])):
+                self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))
 
     def find_representative(self, vertex):
         parent = self.parents[vertex]
@@ -110,5 +96,41 @@ class KruskalGraph(MinimumSpinningTreeGraph):
             return vertex
         else:
             return self.find_representative(parent)
+
+    def add_to_step_list(self, step_number, current_edge):
+        self.steps.append({
+            "step_number": step_number,
+            "tree": self.minimum_spinning_tree_edges.copy(),
+            "parents": self.parents.copy(),
+            "current_edge": current_edge.serialize()
+        })
+
+
+class KruskalGraph(MinimumSpinningTreeGraph):
+    def __init__(self, vertices=None, adjacency_list=None, weights=None):
+        super().__init__(vertices, adjacency_list, weights)
+        self.edge_list.sort(key=edge_sort)
+
+    def find_minimum_spinning_tree(self):
+        step_number = 0
+        for edge in self.edge_list:
+            vertex1, vertex2 = edge.start, edge.end
+            parent1, parent2 = self.find_representative(vertex1), self.find_representative(vertex2)
+            self.add_to_step_list(step_number, edge)
+            step_number += 1
+            if parent1 != parent2:
+                self.parents[parent2] = parent1
+                self.minimum_spinning_tree_edges.append(edge.serialize())
+                self.add_to_step_list(step_number, edge)
+                # TODO: informacja, że krawędź została dodana do drzewa
+                if len(self.minimum_spinning_tree_edges) == len(self.vertices)-1:
+                    # TODO: informacja, że algorytm zakończył się
+                    break
+            else:
+                self.add_to_step_list(step_number, edge)
+                # TODO: informacja, że krawędź nie została dodana do drzewa
+            step_number += 1
+        return self.steps
+
 
 
