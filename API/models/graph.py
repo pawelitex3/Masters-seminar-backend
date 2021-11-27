@@ -1,6 +1,7 @@
 import queue
 from queue import LifoQueue
 from models.edge import Edge, edge_sort
+from bisect import insort
 
 
 class Graph:
@@ -75,8 +76,8 @@ class DFSGraph(SearchGraph):
 
 
 class MinimumSpinningTreeGraph(Graph):
-    def __init__(self, vertices=None, adjacency_list=None, weights=None):
-        super().__init__(vertices, adjacency_list)
+    def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
+        super().__init__(vertices, adjacency_list, current_vertex)
         self.weights = weights
         self.edge_list = list()
         self.parents = [-1 for _ in range(len(self.vertices))]
@@ -123,7 +124,7 @@ class KruskalGraph(MinimumSpinningTreeGraph):
                 self.minimum_spinning_tree_edges.append(edge.serialize())
                 self.add_to_step_list(step_number, edge)
                 # TODO: informacja, że krawędź została dodana do drzewa
-                if len(self.minimum_spinning_tree_edges) == len(self.vertices)-1:
+                if len(self.minimum_spinning_tree_edges) == len(self.vertices) - 1:
                     # TODO: informacja, że algorytm zakończył się
                     break
             else:
@@ -133,4 +134,58 @@ class KruskalGraph(MinimumSpinningTreeGraph):
         return self.steps
 
 
+class PrimDijkstraGraph(MinimumSpinningTreeGraph):
+    def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
+        super().__init__(vertices, adjacency_list, weights, current_vertex)
+        self.visited_edge = [-1 for _ in range(len(self.edge_list))]
+
+    def find_minimum_spinning_tree(self):
+        edges = [x for x in self.edge_list if x.start == self.current_vertex or x.end == self.current_vertex]
+        edges.sort(key=edge_sort)
+        n = len(self.vertices)
+        self.parents[self.current_vertex] = -2
+        step_number = 0
+
+        for edge in edges:
+            index = self.edge_list.index(edge)
+            self.visited_edge[index] = 1
+
+        self.add_to_step_list(step_number, edges[0])
+        step_number += 1
+
+        while len(edges) > 0 and n - 1 != len(self.minimum_spinning_tree_edges):
+            current_edge = edges[0]
+            vertex1, vertex2 = current_edge.start, current_edge.end
+            if self.parents[vertex1] == -1:
+                # TODO: Informacja, że krawędź została dodana
+                self.minimum_spinning_tree_edges.append(current_edge.serialize())
+                edges = self.find_and_add_edges(edges, vertex1)
+                self.parents[vertex1] = vertex2
+
+            elif self.parents[vertex2] == -1:
+                # TODO: Informacja, że krawędź została dodana
+                self.minimum_spinning_tree_edges.append(edges[0].serialize())
+                edges = self.find_and_add_edges(edges, vertex2)
+                self.parents[vertex2] = vertex1
+
+            else:
+                # TODO: Informacja, że dodanie krawędzi spowoduje powstanie cyklu
+                pass
+
+            self.add_to_step_list(step_number, current_edge)
+            step_number += 1
+            edges.pop(0)
+
+        return self.steps
+
+    def find_and_add_edges(self, edges, vertex):
+        # TODO: Czy można to zrobić szybciej?
+        new_edges = [x for x in self.edge_list if x.start == vertex or x.end == vertex]
+        for edge in new_edges:
+            index = self.edge_list.index(edge)
+            if self.visited_edge[index] == -1:
+                insort(edges, edge, key=edge_sort)
+                self.visited_edge[index] = 1
+
+        return edges
 
