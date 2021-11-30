@@ -789,6 +789,10 @@
             "items": {
               "$ref": "#/components/schemas/weights"
             }
+          },
+          "start_vertex": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

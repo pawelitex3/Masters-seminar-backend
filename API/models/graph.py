@@ -197,7 +197,8 @@ class ShortestPathsGraph(Graph):
         super().__init__(vertices, adjacency_list, current_vertex)
         self.weights = weights
         self.parents = [-1 for _ in range(len(self.vertices))]
-        self.costs = [float('inf') for _ in range(len(self.vertices))]
+        # TODO: przemyśleć kwestię największego kosztu!!!
+        self.costs = [100000000 for _ in range(len(self.vertices))]
         self.steps = list()
 
 
@@ -207,19 +208,26 @@ class DijkstraGraph(ShortestPathsGraph):
         self.visited = [-1 for _ in range(len(self.vertices))]
 
     def find_shortest_paths(self):
+        step_number = 0
         self.costs[self.current_vertex] = 0
         for vertex in self.adjacency_list[self.current_vertex]:
-            print(f"{self.current_vertex}, {vertex}")
             vertex_index = self.adjacency_list[self.current_vertex].index(vertex)
             self.costs[vertex] = self.weights[self.current_vertex][vertex_index]
             self.parents[vertex] = self.current_vertex
         self.visited[self.current_vertex] = 1
+
+        self.add_to_step_list(step_number, self.current_vertex)
+        step_number += 1
 
         while self.visited.count(-1) > 0:
             min_cost_vertex = self.visited.index(-1)
             for i in range(min_cost_vertex+1, len(self.vertices)):
                 if self.visited[i] == -1 and self.costs[i] < self.costs[min_cost_vertex]:
                     min_cost_vertex = i
+
+            self.add_to_step_list(step_number, min_cost_vertex)
+            step_number += 1
+
             for neighbour in self.adjacency_list[min_cost_vertex]:
                 if self.visited[neighbour] == -1:
                     neighbour_index = self.adjacency_list[min_cost_vertex].index(neighbour)
@@ -228,4 +236,20 @@ class DijkstraGraph(ShortestPathsGraph):
                         self.parents[neighbour] = min_cost_vertex
                 self.visited[min_cost_vertex] = 1
 
-        print(self.parents)
+                self.add_to_step_list(step_number, min_cost_vertex)
+                step_number += 1
+
+        return self.steps
+
+
+    def add_to_step_list(self, step_number, min_cost_vertex):
+        self.steps.append({
+            "step_number": step_number,
+            "parents": self.parents.copy(),
+            "current_vertex": self.current_vertex,
+            "visited": self.visited.copy(),
+            "costs": self.costs.copy(),
+            "min_cost_vertex": min_cost_vertex
+        })
+
+        
