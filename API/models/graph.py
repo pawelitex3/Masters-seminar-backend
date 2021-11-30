@@ -241,7 +241,6 @@ class DijkstraGraph(ShortestPathsGraph):
 
         return self.steps
 
-
     def add_to_step_list(self, step_number, min_cost_vertex):
         self.steps.append({
             "step_number": step_number,
@@ -251,5 +250,40 @@ class DijkstraGraph(ShortestPathsGraph):
             "costs": self.costs.copy(),
             "min_cost_vertex": min_cost_vertex
         })
-
         
+
+class BellmanFordGraph(ShortestPathsGraph):
+    def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
+        super().__init__(vertices, adjacency_list, weights, current_vertex)
+
+    def find_shortest_paths(self):
+        step_number = 0
+        self.costs[self.current_vertex] = 0
+        for vertex in self.adjacency_list[self.current_vertex]:
+            vertex_index = self.adjacency_list[self.current_vertex].index(vertex)
+            self.costs[vertex] = self.weights[self.current_vertex][vertex_index]
+            self.parents[vertex] = self.current_vertex
+
+        self.add_to_step_list(step_number, self.current_vertex, self.current_vertex)
+        step_number += 1
+        
+        for _ in range(len(self.vertices)-1):
+            for vertex in self.vertices:
+                for neighbour in self.adjacency_list[vertex]:
+                    neighbour_index = self.adjacency_list[vertex].index(neighbour)
+                    if self.costs[neighbour] > self.costs[vertex] + self.weights[vertex][neighbour_index]:
+                        self.costs[neighbour] = self.costs[vertex] + self.weights[vertex][neighbour_index]
+                        self.parents[neighbour] = vertex
+                    
+                    self.add_to_step_list(step_number, vertex, neighbour)
+                    step_number += 1
+        return self.steps
+
+    def add_to_step_list(self, step_number, current_vertex, current_neighbour):
+        self.steps.append({
+            "step_number": step_number,
+            "parents": self.parents.copy(),
+            "current_vertex": current_vertex,
+            "current_neighbour": current_neighbour,
+            "costs": self.costs.copy()
+        })
