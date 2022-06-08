@@ -5,7 +5,7 @@ from bisect import insort
 
 
 class Graph:
-    def __init__(self, vertices=None, adjacency_list=None, current_vertex=0, current_edge=(0, 0), graph_type='undirected'):
+    def __init__(self, vertices=None, adjacency_list=None, current_vertex=0):
         if adjacency_list is None:
             adjacency_list = list()
         if vertices is None:
@@ -13,12 +13,12 @@ class Graph:
         self.vertices = vertices
         self.adjacency_list = adjacency_list
         self.current_vertex = current_vertex
-        self.current_edge = current_edge
+        self.current_edge = (0,0)
         self.steps = list()
         self.collection = list()
         self.red_edges = set()
         self.green_edges = set()
-        self.graph_type = graph_type
+        self.text = ''
 
 
 class SearchGraph(Graph):
@@ -37,7 +37,8 @@ class SearchGraph(Graph):
             "current_vertex": self.current_vertex,
             "current_edge": self.current_edge,
             "red_edges": list(self.red_edges),
-            "green_edges": list(self.green_edges)
+            "green_edges": list(self.green_edges),
+            "info": self.text
         })
 
     def search(self):
@@ -53,6 +54,7 @@ class SearchGraph(Graph):
             current_vertex_index = self.vertices.index(self.current_vertex)
             neighbours = self.adjacency_list[current_vertex_index]
             #TODO: informacja, że przetwarzany jest pierwszy element z kolejki
+            self.text = f'Przetwarzanie wierzchołka {self.current_vertex}.'
             self.add_to_step_list(step_number)
 
             for neighbour in neighbours:
@@ -60,18 +62,23 @@ class SearchGraph(Graph):
                 self.current_edge = (self.current_vertex, current_neighbour_index)
                 if self.visited[current_neighbour_index] == 0:
                     # TODO: informacja, że do kolejki zostały dodane nowe wierzchołki
+                    self.text = f'Dodanie wierzchołka {current_neighbour_index} do kolejki. Dodanie krawędzi łączącej wierzchołki {self.current_vertex} oraz {current_neighbour_index} do drzewa wynikowego.'
                     self.collection.put(neighbour)
                     self.visited[current_neighbour_index] = 1
                     self.parents[current_neighbour_index] = self.current_vertex
                     self.green_edges.add((self.current_vertex, current_neighbour_index))
                 elif self.parents[self.current_vertex] != current_neighbour_index:
+                    self.text = f'Krawędź łącząca wierzchołki {self.current_vertex} oraz {current_neighbour_index} nie zostaje dodana do drzewa wynikowego.'
                     self.red_edges.add((self.current_vertex, current_neighbour_index))
+                else:
+                    self.text = f'Krawędź łącząca wierzchołki {self.current_vertex} oraz {current_neighbour_index} została już wcześniej odwiedzona i dodana do drzewa wynikowego.'
                 step_number += 1
                 self.add_to_step_list(step_number)
 
             self.visited[current_vertex_index] = 2
             step_number += 1
 
+        self.text = f'Wynik działania algorytmu.'
         self.add_to_step_list(step_number)
 
         return self.steps
@@ -104,11 +111,8 @@ class MinimumSpinningTreeGraph(Graph):
     def create_edge_list(self):
         for i in range(len(self.adjacency_list)):
             for j in range(len(self.adjacency_list[i])):
-                if self.graph_type == 'undirected':
-                    if self.adjacency_list[i][j] > i:
-                        self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))
-                else:
-                    self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))
+                if self.adjacency_list[i][j] > i:
+                    self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))    
 
     def find_representative(self, vertex):
         parent = self.parents[vertex]
@@ -125,7 +129,8 @@ class MinimumSpinningTreeGraph(Graph):
             "current_edge": (current_edge.start, current_edge.end),
             "red_edges": list(self.red_edges),
             "green_edges": list(self.green_edges),
-            "green_vertices": list(self.green_vertices)
+            "green_vertices": list(self.green_vertices),
+            "info": self.text
         })
 
 
@@ -134,11 +139,19 @@ class KruskalGraph(MinimumSpinningTreeGraph):
         super().__init__(vertices, adjacency_list, weights)
         self.edge_list.sort(key=edge_sort)
 
+    def create_edge_list(self):
+        for i in range(len(self.adjacency_list)):
+            for j in range(len(self.adjacency_list[i])):
+                if self.adjacency_list[i][j] > i:
+                    self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))
+
     def find_minimum_spinning_tree(self):
+        #print(self.edge_list)
         step_number = 0
         for edge in self.edge_list:
             vertex1, vertex2 = edge.start, edge.end
             parent1, parent2 = self.find_representative(vertex1), self.find_representative(vertex2)
+            self.text = f'Sprawdzanie krawędzi łączącej wierzchołki {vertex1} oraz {vertex2}.'
             self.add_to_step_list(step_number, edge)
             step_number += 1
             if parent1 != parent2:
@@ -147,17 +160,19 @@ class KruskalGraph(MinimumSpinningTreeGraph):
                 self.green_edges.add((edge.start, edge.end))
                 self.green_vertices.add(edge.start)
                 self.green_vertices.add(edge.end)
+                self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} nie utworzy cyklu - zostaje dodana do drzewa wynikowego.'
                 self.add_to_step_list(step_number, edge)
                 # TODO: informacja, że krawędź została dodana do drzewa
                 if len(self.minimum_spinning_tree_edges) == len(self.vertices) - 1:
                     # TODO: informacja, że algorytm zakończył się
                     break
             else:
+                self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} spowoduje utworzenie cyklu - nie zostaje dodana do drzewa wynikowego.'
                 self.red_edges.add((edge.start, edge.end))
                 self.add_to_step_list(step_number, edge)
                 # TODO: informacja, że krawędź nie została dodana do drzewa
             step_number += 1
-        print(self.steps)
+        #print(self.steps)
         return self.steps
 
 
@@ -165,6 +180,9 @@ class PrimDijkstraGraph(MinimumSpinningTreeGraph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, weights, current_vertex)
         self.visited_edge = [-1 for _ in range(len(self.edge_list))]
+
+    
+
 
     def find_minimum_spinning_tree(self):
         edges = [x for x in self.edge_list if x.start == self.current_vertex or x.end == self.current_vertex]
@@ -176,32 +194,48 @@ class PrimDijkstraGraph(MinimumSpinningTreeGraph):
         for edge in edges:
             index = self.edge_list.index(edge)
             self.visited_edge[index] = 1
+            print(edge)
 
-        self.add_to_step_list(step_number, edges[0])
-        step_number += 1
-
+        # self.add_to_step_list(step_number, edges[0])
+        # step_number += 1
+        print(edges)
         while len(edges) > 0 and n - 1 != len(self.minimum_spinning_tree_edges):
+            
             current_edge = edges[0]
+            edges.pop(0)
             vertex1, vertex2 = current_edge.start, current_edge.end
+            print(f'{vertex1} {vertex2}')
+            self.text = f'Sprawdzanie krawędzi łączącej wierzchołki {vertex1} oraz {vertex2}.'
+            self.add_to_step_list(step_number, current_edge)
+            step_number += 1
             if self.parents[vertex1] == -1:
                 # TODO: Informacja, że krawędź została dodana
                 self.minimum_spinning_tree_edges.append(current_edge.serialize())
                 edges = self.find_and_add_edges(edges, vertex1)
                 self.parents[vertex1] = vertex2
+                self.green_edges.add((vertex1, vertex2))
+                self.green_vertices.add(vertex1)
+                self.green_vertices.add(vertex2)
+                self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} została dodana.'
 
             elif self.parents[vertex2] == -1:
                 # TODO: Informacja, że krawędź została dodana
                 self.minimum_spinning_tree_edges.append(edges[0].serialize())
                 edges = self.find_and_add_edges(edges, vertex2)
                 self.parents[vertex2] = vertex1
-
+                self.green_edges.add((vertex1, vertex2))
+                self.green_vertices.add(vertex1)
+                self.green_vertices.add(vertex2)
+                self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} nie utworzy cyklu - została dodana do drzewa wynikowego.'
             else:
                 # TODO: Informacja, że dodanie krawędzi spowoduje powstanie cyklu
+                self.red_edges.add((vertex1, vertex2))
+                self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} spowoduje powstanie cyklu - nie została dodana do drzewa wynikowego.'
                 pass
 
             self.add_to_step_list(step_number, current_edge)
             step_number += 1
-            edges.pop(0)
+            
 
         return self.steps
 
@@ -231,39 +265,59 @@ class DijkstraGraph(ShortestPathsGraph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, weights, current_vertex)
         self.visited = [-1 for _ in range(len(self.vertices))]
+        self.green_vertices = set()
 
     def find_shortest_paths(self):
+        print(self.weights)
+        print(self.adjacency_list)
         step_number = 0
         self.costs[self.current_vertex] = 0
         for vertex in self.adjacency_list[self.current_vertex]:
             vertex_index = self.adjacency_list[self.current_vertex].index(vertex)
+            print(self.current_vertex)
+            print(vertex_index)
+            print(self.weights)
+            print(vertex)
             self.costs[vertex] = self.weights[self.current_vertex][vertex_index]
             self.parents[vertex] = self.current_vertex
         self.visited[self.current_vertex] = 1
-
+        
+        self.green_vertices.add(self.current_vertex)
+        self.text = 'Inicjalizacja - poszukiwanie najtańszego sąsiada wierzchołka startowego.'
         self.add_to_step_list(step_number, self.current_vertex)
         step_number += 1
 
-        while self.visited.count(-1) > 0:
+        for _ in range(len(self.vertices)-1):
+        #while self.visited.count(-1) > 0:
+            print("stop")
+            self.current_edge = (0, 0)
             min_cost_vertex = self.visited.index(-1)
             for i in range(min_cost_vertex+1, len(self.vertices)):
                 if self.visited[i] == -1 and self.costs[i] < self.costs[min_cost_vertex]:
                     min_cost_vertex = i
-
+            print(self.visited)
+            self.text = f'Wybór najtańszego nieodwiedzonego wierzchołka - wierzchołek {min_cost_vertex}.'
+            self.green_vertices.add(min_cost_vertex)
+            self.green_edges.add((self.parents[min_cost_vertex], min_cost_vertex))
             self.add_to_step_list(step_number, min_cost_vertex)
             step_number += 1
 
             for neighbour in self.adjacency_list[min_cost_vertex]:
+                
                 if self.visited[neighbour] == -1:
+                    self.text = f'Korekta kosztu na podstawie krawędzi łączącej wierzchołki {min_cost_vertex} oraz {neighbour}.'
+                    self.current_edge = (min_cost_vertex, neighbour)
                     neighbour_index = self.adjacency_list[min_cost_vertex].index(neighbour)
                     if self.costs[neighbour] > self.costs[min_cost_vertex] + self.weights[min_cost_vertex][neighbour_index]:
                         self.costs[neighbour] = self.costs[min_cost_vertex] + self.weights[min_cost_vertex][neighbour_index]
                         self.parents[neighbour] = min_cost_vertex
-                self.visited[min_cost_vertex] = 1
-
-                self.add_to_step_list(step_number, min_cost_vertex)
-                step_number += 1
-
+                    self.add_to_step_list(step_number, min_cost_vertex)
+                    step_number += 1
+            self.visited[min_cost_vertex] = 1
+            self.text = f'Wszystkie korekty wierzchołka {min_cost_vertex} zostały dokonane - jest już odwiedzony.'
+            self.add_to_step_list(step_number, min_cost_vertex)
+            step_number += 1
+        #print(self.steps)
         return self.steps
 
     def add_to_step_list(self, step_number, min_cost_vertex):
@@ -273,7 +327,11 @@ class DijkstraGraph(ShortestPathsGraph):
             "current_vertex": self.current_vertex,
             "visited": self.visited.copy(),
             "costs": self.costs.copy(),
-            "min_cost_vertex": min_cost_vertex
+            "min_cost_vertex": min_cost_vertex,
+            "green_vertices": list(self.green_vertices),
+            "green_edges": list(self.green_edges),
+            "info": self.text,
+            "current_edge": self.current_edge
         })
         
 

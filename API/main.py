@@ -77,6 +77,8 @@ def Dijkstra():
     vertices = request_data['vertices']
     adjacency_list = request_data['adjacency_list']
     weights = request_data['weights']
+    print(adjacency_list)
+    print(weights)
     current_vertex = request_data['start_vertex']
     graph = DijkstraGraph(vertices, adjacency_list, weights, current_vertex)
     return jsonify(graph.find_shortest_paths())
