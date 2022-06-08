@@ -5,7 +5,7 @@ from bisect import insort
 
 
 class Graph:
-    def __init__(self, vertices=None, adjacency_list=None, current_vertex=0):
+    def __init__(self, vertices=None, adjacency_list=None, current_vertex=0, current_edge=(0, 0), graph_type='undirected'):
         if adjacency_list is None:
             adjacency_list = list()
         if vertices is None:
@@ -13,8 +13,12 @@ class Graph:
         self.vertices = vertices
         self.adjacency_list = adjacency_list
         self.current_vertex = current_vertex
+        self.current_edge = current_edge
         self.steps = list()
         self.collection = list()
+        self.red_edges = set()
+        self.green_edges = set()
+        self.graph_type = graph_type
 
 
 class SearchGraph(Graph):
@@ -30,7 +34,10 @@ class SearchGraph(Graph):
             f"{self.collection_type}": list(self.collection.queue),
             "visited": self.visited.copy(),
             "parents": self.parents.copy(),
-            "current_vertex": self.current_vertex
+            "current_vertex": self.current_vertex,
+            "current_edge": self.current_edge,
+            "red_edges": list(self.red_edges),
+            "green_edges": list(self.green_edges)
         })
 
     def search(self):
@@ -42,6 +49,7 @@ class SearchGraph(Graph):
 
         while not self.collection.empty():
             self.current_vertex = self.collection.get()
+            self.current_edge = (0, 0)
             current_vertex_index = self.vertices.index(self.current_vertex)
             neighbours = self.adjacency_list[current_vertex_index]
             #TODO: informacja, że przetwarzany jest pierwszy element z kolejki
@@ -49,11 +57,15 @@ class SearchGraph(Graph):
 
             for neighbour in neighbours:
                 current_neighbour_index = self.vertices.index(neighbour)
+                self.current_edge = (self.current_vertex, current_neighbour_index)
                 if self.visited[current_neighbour_index] == 0:
                     # TODO: informacja, że do kolejki zostały dodane nowe wierzchołki
                     self.collection.put(neighbour)
                     self.visited[current_neighbour_index] = 1
                     self.parents[current_neighbour_index] = self.current_vertex
+                    self.green_edges.add((self.current_vertex, current_neighbour_index))
+                elif self.parents[self.current_vertex] != current_neighbour_index:
+                    self.red_edges.add((self.current_vertex, current_neighbour_index))
                 step_number += 1
                 self.add_to_step_list(step_number)
 
@@ -85,13 +97,18 @@ class MinimumSpinningTreeGraph(Graph):
         self.parents = [-1 for _ in range(len(self.vertices))]
         self.minimum_spinning_tree_edges = list()
         self.steps = list()
+        self.green_vertices = set()
 
         self.create_edge_list()
 
     def create_edge_list(self):
         for i in range(len(self.adjacency_list)):
             for j in range(len(self.adjacency_list[i])):
-                self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))
+                if self.graph_type == 'undirected':
+                    if self.adjacency_list[i][j] > i:
+                        self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))
+                else:
+                    self.edge_list.append(Edge(i, self.adjacency_list[i][j], self.weights[i][j]))
 
     def find_representative(self, vertex):
         parent = self.parents[vertex]
@@ -103,9 +120,12 @@ class MinimumSpinningTreeGraph(Graph):
     def add_to_step_list(self, step_number, current_edge):
         self.steps.append({
             "step_number": step_number,
-            "tree": self.minimum_spinning_tree_edges.copy(),
+            #"tree": self.minimum_spinning_tree_edges.copy(),
             "parents": self.parents.copy(),
-            "current_edge": current_edge.serialize()
+            "current_edge": (current_edge.start, current_edge.end),
+            "red_edges": list(self.red_edges),
+            "green_edges": list(self.green_edges),
+            "green_vertices": list(self.green_vertices)
         })
 
 
@@ -124,15 +144,20 @@ class KruskalGraph(MinimumSpinningTreeGraph):
             if parent1 != parent2:
                 self.parents[parent2] = parent1
                 self.minimum_spinning_tree_edges.append(edge.serialize())
+                self.green_edges.add((edge.start, edge.end))
+                self.green_vertices.add(edge.start)
+                self.green_vertices.add(edge.end)
                 self.add_to_step_list(step_number, edge)
                 # TODO: informacja, że krawędź została dodana do drzewa
                 if len(self.minimum_spinning_tree_edges) == len(self.vertices) - 1:
                     # TODO: informacja, że algorytm zakończył się
                     break
             else:
+                self.red_edges.add((edge.start, edge.end))
                 self.add_to_step_list(step_number, edge)
                 # TODO: informacja, że krawędź nie została dodana do drzewa
             step_number += 1
+        print(self.steps)
         return self.steps
 
 

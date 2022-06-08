@@ -27,14 +27,14 @@ def BFS():
     vertices = request_data['vertices']
     adjacency_list = request_data['adjacency_list']
     current_vertex = request_data['start_vertex']
-    print(vertices)
-    print(adjacency_list)
-    print(current_vertex)
-    G = nx.Graph()
-    for i in range(len(adjacency_list)):
-        for j in range(len(adjacency_list[i])):
-            G.add_edge(i, adjacency_list[i][j])
-    print(jsonify(G))
+    # print(vertices)
+    # print(adjacency_list)
+    # print(current_vertex)
+    # G = nx.Graph()
+    # for i in range(len(adjacency_list)):
+    #     for j in range(len(adjacency_list[i])):
+    #         G.add_edge(i, adjacency_list[i][j])
+    # print(jsonify(G))
     #nx.draw(G)
     #plt.show()
     graph = BFSGraph(vertices, adjacency_list, current_vertex)
