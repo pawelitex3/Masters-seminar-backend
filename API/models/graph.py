@@ -315,6 +315,7 @@ class DijkstraGraph(ShortestPathsGraph):
                     step_number += 1
             self.visited[min_cost_vertex] = 1
             self.text = f'Wszystkie korekty wierzchołka {min_cost_vertex} zostały dokonane - jest już odwiedzony.'
+            self.current_edge = (0, 0)
             self.add_to_step_list(step_number, min_cost_vertex)
             step_number += 1
         #print(self.steps)
