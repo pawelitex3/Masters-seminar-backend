@@ -71,6 +71,8 @@ class SearchGraph(Graph):
                     self.text = f'Krawędź łącząca wierzchołki {self.current_vertex} oraz {current_neighbour_index} nie zostaje dodana do drzewa wynikowego.'
                     self.red_edges.add((self.current_vertex, current_neighbour_index))
                 else:
+                    #TODO: ZMIENIĆ OPIS PRZY GRAFIE SKIEROWANYM!!!!!!!!
+                    self.red_edges.add((self.current_vertex, current_neighbour_index))
                     self.text = f'Krawędź łącząca wierzchołki {self.current_vertex} oraz {current_neighbour_index} została już wcześniej odwiedzona i dodana do drzewa wynikowego.'
                 step_number += 1
                 self.add_to_step_list(step_number)
@@ -259,13 +261,14 @@ class ShortestPathsGraph(Graph):
         # TODO: przemyśleć kwestię największego kosztu!!!
         self.costs = [100000000 for _ in range(len(self.vertices))]
         self.steps = list()
+        self.green_vertices = set()
 
 
 class DijkstraGraph(ShortestPathsGraph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, weights, current_vertex)
         self.visited = [-1 for _ in range(len(self.vertices))]
-        self.green_vertices = set()
+        
 
     def find_shortest_paths(self):
         print(self.weights)
@@ -347,20 +350,38 @@ class BellmanFordGraph(ShortestPathsGraph):
             vertex_index = self.adjacency_list[self.current_vertex].index(vertex)
             self.costs[vertex] = self.weights[self.current_vertex][vertex_index]
             self.parents[vertex] = self.current_vertex
-
+            self.green_edges.add((self.current_vertex, vertex))
+        
+        self.text = 'Inicjalizacja - ustalenie kosztów na podstawie danych o sąsiadach wierzchołka początkowego.'
         self.add_to_step_list(step_number, self.current_vertex, self.current_vertex)
         step_number += 1
         
-        for _ in range(len(self.vertices)-1):
+        for i in range(len(self.vertices)-1):
             for vertex in self.vertices:
                 for neighbour in self.adjacency_list[vertex]:
                     neighbour_index = self.adjacency_list[vertex].index(neighbour)
                     if self.costs[neighbour] > self.costs[vertex] + self.weights[vertex][neighbour_index]:
                         self.costs[neighbour] = self.costs[vertex] + self.weights[vertex][neighbour_index]
+                        if self.parents[neighbour] != -1:
+                            print(list(self.green_edges))
+                            self.green_edges.remove((self.parents[neighbour], neighbour))
+                            self.text = f'Iteracja {i+1}: usunięcie krawędzi łączącej wierzchołki {self.parents[neighbour]} oraz {neighbour} z wyniku. '
+                        else:
+                            self.text = f'Iteracja {i+1}: '
+                        self.text += f'Dodanie krawędzi łączącej wierzchołki {vertex} oraz {neighbour} do wyniku. Aktualizacja kosztów dotarcia do wierzchołka {neighbour}.'
                         self.parents[neighbour] = vertex
-                    
+                        self.green_edges.add((vertex, neighbour))
+                    else:
+                        self.text = f'Iteracja {i+1}: krawędź łącząca wierzchołki {vertex} oraz {neighbour} nie wnosi żadnych zmian.'
+
+                    self.current_edge = (vertex, neighbour)
                     self.add_to_step_list(step_number, vertex, neighbour)
                     step_number += 1
+                self.current_edge = (0, 0)
+                self.text = f'Iteracja {i+1}: zakończenie przetwarzania wierzchołka {vertex}.'
+                self.add_to_step_list(step_number, vertex, neighbour)
+                step_number += 1
+        print(self.steps)
         return self.steps
 
     def add_to_step_list(self, step_number, current_vertex, current_neighbour):
@@ -369,5 +390,8 @@ class BellmanFordGraph(ShortestPathsGraph):
             "parents": self.parents.copy(),
             "current_vertex": current_vertex,
             "current_neighbour": current_neighbour,
-            "costs": self.costs.copy()
+            "costs": self.costs.copy(),
+            "green_edges": list(self.green_edges),
+            "info": self.text,
+            "current_edge": self.current_edge
         })
