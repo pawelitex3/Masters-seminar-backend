@@ -210,7 +210,7 @@
     "/api/Kruskal": {
       "post": {
         "tags": [
-          "Minimum Spanning Tree Algorithm"
+          "Minimum Spanning Tree Algorithms"
         ],
         "parameters": [
           {
@@ -369,7 +369,7 @@
             }
           }
         },
-        "summary": "Returns a step list of BFS",
+        "summary": "Returns a step list of Kruskal algorithm",
         "responses": {
           "200": {
             "description": "OK",
@@ -383,7 +383,7 @@
     "/api/PrimDijkstra": {
       "post": {
         "tags": [
-          "Minimum Spanning Tree Algorithm"
+          "Minimum Spanning Tree Algorithms"
         ],
         "parameters": [
           {
@@ -542,7 +542,7 @@
             }
           }
         },
-        "summary": "Returns a step list of BFS",
+        "summary": "Returns a step list of Prim-Dijkstra algorithm",
         "responses": {
           "200": {
             "description": "OK",
@@ -556,7 +556,7 @@
     "/api/Dijkstra": {
       "post": {
         "tags": [
-          "Finding Shortest Paths Algorithm"
+          "Finding Shortest Paths Algorithms"
         ],
         "parameters": [
           {
@@ -715,7 +715,7 @@
             }
           }
         },
-        "summary": "Returns a step list of BFS",
+        "summary": "Returns a step list of Dijkstra algorithm",
         "responses": {
           "200": {
             "description": "OK",
@@ -729,14 +729,14 @@
     "/api/BellmanFord": {
       "post": {
         "tags": [
-          "Finding Shortest Paths Algorithm"
+          "Finding Shortest Paths Algorithms"
         ],
         "parameters": [
           {
             "in": "body",
             "name": "BellmanFord",
             "required": true,
-            "description": "Returns a step list of BellmanFord algorithm",
+            "description": "Returns a step list of Bellman-Ford algorithm",
             "schema": {
               "$ref": "#/components/schemas/network_input"
             },
@@ -888,7 +888,7 @@
             }
           }
         },
-        "summary": "Returns a step list of BFS",
+        "summary": "Returns a step list of Bellman-Ford algorithm",
         "responses": {
           "200": {
             "description": "OK",
