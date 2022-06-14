@@ -44,7 +44,7 @@ def Kruskal():
     adjacency_list = request_data['adjacency_list']
     weights = request_data['weights']
     graph = KruskalGraph(vertices, adjacency_list, weights)
-    return jsonify(graph.find_minimum_spinning_tree())
+    return jsonify(graph.find_minimum_spanning_tree())
 
 
 @app.route("/api/PrimDijkstra", methods=['POST'])
@@ -55,7 +55,7 @@ def PrimDijkstra():
     weights = request_data['weights']
     current_vertex = request_data['start_vertex']
     graph = PrimDijkstraGraph(vertices, adjacency_list, weights, current_vertex)
-    return jsonify(graph.find_minimum_spinning_tree())
+    return jsonify(graph.find_minimum_spanning_tree())
 
 @app.route("/api/Dijkstra", methods=['POST'])
 def Dijkstra():

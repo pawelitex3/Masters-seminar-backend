@@ -94,12 +94,12 @@ class DFSGraph(SearchGraph):
         self.collection = LifoQueue()
 
 
-class MinimumSpinningTreeGraph(Graph):
+class MinimumSpanningTreeGraph(Graph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, current_vertex)
         self.weights = weights
         self.edge_list = list()
-        self.minimum_spinning_tree_edges = list()
+        self.mst_edges = list()
         self.green_vertices = set()
         self.create_edge_list()
 
@@ -112,8 +112,8 @@ class MinimumSpinningTreeGraph(Graph):
     def add_to_step_list(self, step_number, current_edge):
         self.steps.append({
             "step_number": step_number,
-            #"tree": self.minimum_spinning_tree_edges.copy(),
-            "parents": self.parents.copy(),
+            #"tree": self.mst_edges.copy(),
+            #"parents": self.parents.copy(),
             "current_edge": (current_edge.start, current_edge.end),
             "red_edges": list(self.red_edges),
             "green_edges": list(self.green_edges),
@@ -122,7 +122,7 @@ class MinimumSpinningTreeGraph(Graph):
         })
 
 
-class KruskalGraph(MinimumSpinningTreeGraph):
+class KruskalGraph(MinimumSpanningTreeGraph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None):
         super().__init__(vertices, adjacency_list, weights)
         self.edge_list.sort(key=edge_sort)
@@ -134,7 +134,7 @@ class KruskalGraph(MinimumSpinningTreeGraph):
         else:
             return self.find_representative(parent)
 
-    def find_minimum_spinning_tree(self):
+    def find_minimum_spanning_tree(self):
         step_number = 0
         for edge in self.edge_list:
             vertex1, vertex2 = edge.start, edge.end
@@ -144,14 +144,14 @@ class KruskalGraph(MinimumSpinningTreeGraph):
             step_number += 1
             if parent1 != parent2:
                 self.parents[parent2] = parent1
-                self.minimum_spinning_tree_edges.append(edge.serialize())
+                self.mst_edges.append(edge.serialize())
                 self.green_edges.add((edge.start, edge.end))
                 self.green_vertices.add(edge.start)
                 self.green_vertices.add(edge.end)
                 self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} nie utworzy cyklu - zostaje dodana do drzewa wynikowego.'
                 self.add_to_step_list(step_number, edge)
                 # TODO: informacja, że krawędź została dodana do drzewa
-                if len(self.minimum_spinning_tree_edges) == len(self.vertices) - 1:
+                if len(self.mst_edges) == len(self.vertices) - 1:
                     # TODO: informacja, że algorytm zakończył się
                     break
             else:
@@ -163,7 +163,7 @@ class KruskalGraph(MinimumSpinningTreeGraph):
         return self.steps
 
 
-class PrimDijkstraGraph(MinimumSpinningTreeGraph):
+class PrimDijkstraGraph(MinimumSpanningTreeGraph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, weights, current_vertex)
         self.visited_edge = [-1 for _ in range(len(self.edge_list))]
@@ -179,7 +179,8 @@ class PrimDijkstraGraph(MinimumSpinningTreeGraph):
 
         return edges
 
-    def find_minimum_spinning_tree(self):
+    def find_minimum_spanning_tree(self):
+        # Nadanie wartosci poczatkowych
         edges = [x for x in self.edge_list if x.start == self.current_vertex or x.end == self.current_vertex]
         edges.sort(key=edge_sort)
         n = len(self.vertices)
@@ -190,17 +191,19 @@ class PrimDijkstraGraph(MinimumSpinningTreeGraph):
             index = self.edge_list.index(edge)
             self.visited_edge[index] = 1
 
-        while len(edges) > 0 and n - 1 != len(self.minimum_spinning_tree_edges):
-            
+        # Sprawdzanie kazdej krawedzi, z ktora incydentne sa wierzcholki w grafie
+        while len(edges) > 0 and n - 1 != len(self.mst_edges):
             current_edge = edges[0]
             edges.pop(0)
             vertex1, vertex2 = current_edge.start, current_edge.end
             self.text = f'Sprawdzanie krawędzi łączącej wierzchołki {vertex1} oraz {vertex2}.'
             self.add_to_step_list(step_number, current_edge)
             step_number += 1
+
+            # Jesli pierwszy wierzcholek jeszcze nie jest w grafie
             if self.parents[vertex1] == -1:
                 # TODO: Informacja, że krawędź została dodana
-                self.minimum_spinning_tree_edges.append(current_edge.serialize())
+                self.mst_edges.append(current_edge.serialize())
                 edges = self.find_and_add_edges(edges, vertex1)
                 self.parents[vertex1] = vertex2
                 self.green_edges.add((vertex1, vertex2))
@@ -208,15 +211,18 @@ class PrimDijkstraGraph(MinimumSpinningTreeGraph):
                 self.green_vertices.add(vertex2)
                 self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} została dodana.'
 
+            # Jesli drugi wierzcholek jeszcze nie jest w grafie
             elif self.parents[vertex2] == -1:
                 # TODO: Informacja, że krawędź została dodana
-                self.minimum_spinning_tree_edges.append(edges[0].serialize())
+                self.mst_edges.append(edges[0].serialize())
                 edges = self.find_and_add_edges(edges, vertex2)
                 self.parents[vertex2] = vertex1
                 self.green_edges.add((vertex1, vertex2))
                 self.green_vertices.add(vertex1)
                 self.green_vertices.add(vertex2)
                 self.text = f'Krawędź łącząca wierzchołki {vertex1} oraz {vertex2} nie utworzy cyklu - została dodana do drzewa wynikowego.'
+            
+            # Jesli obydwa wierzcholki sa juz w grafie
             else:
                 # TODO: Informacja, że dodanie krawędzi spowoduje powstanie cyklu
                 self.red_edges.add((vertex1, vertex2))
@@ -234,18 +240,28 @@ class ShortestPathsGraph(Graph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, current_vertex)
         self.weights = weights
-        
-        # TODO: przemyśleć kwestię największego kosztu!!!
         self.costs = [100000000 for _ in range(len(self.vertices))]
-        self.steps = list()
-        self.green_vertices = set()
 
 
 class DijkstraGraph(ShortestPathsGraph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, weights, current_vertex)
         self.visited = [-1 for _ in range(len(self.vertices))]
-        
+        self.green_vertices = set()
+
+    def add_to_step_list(self, step_number, min_cost_vertex):
+        self.steps.append({
+            "step_number": step_number,
+            "parents": self.parents.copy(),
+            "current_vertex": self.current_vertex,
+            "visited": self.visited.copy(),
+            "costs": self.costs.copy(),
+            "min_cost_vertex": min_cost_vertex,
+            "green_vertices": list(self.green_vertices),
+            "green_edges": list(self.green_edges),
+            "info": self.text,
+            "current_edge": self.current_edge
+        })
 
     def find_shortest_paths(self):
         step_number = 0
@@ -291,24 +307,24 @@ class DijkstraGraph(ShortestPathsGraph):
             step_number += 1
         return self.steps
 
-    def add_to_step_list(self, step_number, min_cost_vertex):
-        self.steps.append({
-            "step_number": step_number,
-            "parents": self.parents.copy(),
-            "current_vertex": self.current_vertex,
-            "visited": self.visited.copy(),
-            "costs": self.costs.copy(),
-            "min_cost_vertex": min_cost_vertex,
-            "green_vertices": list(self.green_vertices),
-            "green_edges": list(self.green_edges),
-            "info": self.text,
-            "current_edge": self.current_edge
-        })
+    
         
 
 class BellmanFordGraph(ShortestPathsGraph):
     def __init__(self, vertices=None, adjacency_list=None, weights=None, current_vertex=0):
         super().__init__(vertices, adjacency_list, weights, current_vertex)
+
+    def add_to_step_list(self, step_number, current_vertex, current_neighbour):
+        self.steps.append({
+            "step_number": step_number,
+            "parents": self.parents.copy(),
+            "current_vertex": current_vertex,
+            "current_neighbour": current_neighbour,
+            "costs": self.costs.copy(),
+            "green_edges": list(self.green_edges),
+            "info": self.text,
+            "current_edge": self.current_edge
+        })
 
     def find_shortest_paths(self):
         step_number = 0
@@ -349,14 +365,4 @@ class BellmanFordGraph(ShortestPathsGraph):
                 step_number += 1
         return self.steps
 
-    def add_to_step_list(self, step_number, current_vertex, current_neighbour):
-        self.steps.append({
-            "step_number": step_number,
-            "parents": self.parents.copy(),
-            "current_vertex": current_vertex,
-            "current_neighbour": current_neighbour,
-            "costs": self.costs.copy(),
-            "green_edges": list(self.green_edges),
-            "info": self.text,
-            "current_edge": self.current_edge
-        })
+    
