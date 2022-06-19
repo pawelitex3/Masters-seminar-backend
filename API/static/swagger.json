@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "description": "API that returns a step list of graph algorithm operation.",
+    "description": "API zwracające listę kroków działania wybranego algorytmu grafowego.",
     "version": "1.0.0",
     "title": "Graph-API",
     "contact": {
@@ -16,14 +16,14 @@
     "/api/BFS": {
         "post": {
           "tags": [
-            "Search algorithms"
+            "Algorytmy przeszukiwania"
           ],
           "parameters": [
             {
               "in": "body",
               "name": "BFS",
               "required": true,
-              "description": "Returns a step list of BFS",
+              "description": "Zwraca listę korków działania algorytmu BFS.",
               "schema": {
                 "$ref": "#/components/schemas/graph_input"
               },
@@ -99,7 +99,7 @@
               }
             }
           },
-          "summary": "Returns a step list of BFS",
+          "summary": "Zwraca listę korków działania algorytmu BFS.",
           "responses": {
             "200": {
               "description": "OK",
@@ -113,14 +113,14 @@
     "/api/DFS": {
         "post": {
           "tags": [
-            "Search algorithms"
+            "Algorytmy przeszukiwania"
           ],
           "parameters": [
             {
               "in": "body",
               "name": "DFS",
               "required": true,
-              "description": "Returns a step list of DFS",
+              "description": "Zwraca listę korków działania algorytmu DFS.",
               "schema": {
                 "$ref": "#/components/schemas/graph_input"
               },
@@ -196,7 +196,7 @@
               }
             }
           },
-          "summary": "Returns a step list of DFS",
+          "summary": "Zwraca listę korków działania algorytmu DFS.",
           "responses": {
             "200": {
               "description": "OK",
@@ -210,14 +210,14 @@
     "/api/Kruskal": {
       "post": {
         "tags": [
-          "Minimum Spanning Tree Algorithms"
+          "Algorytmy znajdujące minimalne drzewo rozpinające"
         ],
         "parameters": [
           {
             "in": "body",
             "name": "Kruskal",
             "required": true,
-            "description": "Returns a step list of Kruskal algorithm",
+            "description": "Zwraca listę kroków działania algorytmu Kruskala.",
             "schema": {
               "$ref": "#/components/schemas/network_input"
             },
@@ -369,7 +369,7 @@
             }
           }
         },
-        "summary": "Returns a step list of Kruskal algorithm",
+        "summary": "Zwraca listę kroków działania algorytmu Kruskala.",
         "responses": {
           "200": {
             "description": "OK",
@@ -383,14 +383,14 @@
     "/api/PrimDijkstra": {
       "post": {
         "tags": [
-          "Minimum Spanning Tree Algorithms"
+          "Algorytmy znajdujące minimalne drzewo rozpinające"
         ],
         "parameters": [
           {
             "in": "body",
             "name": "PrimDijkstra",
             "required": true,
-            "description": "Returns a step list of Prim-Dijkstra algorithm",
+            "description": "Zwraca listę kroków działania algorytmu Prima-Dijkstry",
             "schema": {
               "$ref": "#/components/schemas/network_input"
             },
@@ -542,7 +542,7 @@
             }
           }
         },
-        "summary": "Returns a step list of Prim-Dijkstra algorithm",
+        "summary": "Zwraca listę kroków działania algorytmu Prima-Dijkstry.",
         "responses": {
           "200": {
             "description": "OK",
@@ -556,14 +556,14 @@
     "/api/Dijkstra": {
       "post": {
         "tags": [
-          "Finding Shortest Paths Algorithms"
+          "Algorytmy znajdujące drzewo najkrótszych dróg"
         ],
         "parameters": [
           {
             "in": "body",
             "name": "Dijkstra",
             "required": true,
-            "description": "Returns a step list of Dijkstra algorithm",
+            "description": "Zwraca listę kroków działania algorytmu Dijkstry.",
             "schema": {
               "$ref": "#/components/schemas/network_input"
             },
@@ -715,7 +715,7 @@
             }
           }
         },
-        "summary": "Returns a step list of Dijkstra algorithm",
+        "summary": "Zwraca listę kroków działania algorytmu Dijkstry.",
         "responses": {
           "200": {
             "description": "OK",
@@ -729,14 +729,14 @@
     "/api/BellmanFord": {
       "post": {
         "tags": [
-          "Finding Shortest Paths Algorithms"
+          "Algorytmy znajdujące drzewo najkrótszych dróg"
         ],
         "parameters": [
           {
             "in": "body",
             "name": "BellmanFord",
             "required": true,
-            "description": "Returns a step list of Bellman-Ford algorithm",
+            "description": "Zwraca listę kroków działania algorytmu Bellmana-Forda.",
             "schema": {
               "$ref": "#/components/schemas/network_input"
             },
@@ -888,7 +888,7 @@
             }
           }
         },
-        "summary": "Returns a step list of Bellman-Ford algorithm",
+        "summary": "Zwraca listę kroków działania algorytmu Bellmana-Forda",
         "responses": {
           "200": {
             "description": "OK",
