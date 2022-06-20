@@ -374,7 +374,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/components/schemas/BFS_output"
+              "$ref": "#/components/schemas/Kruskal_output"
             }
           }
         }
@@ -547,7 +547,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/components/schemas/BFS_output"
+              "$ref": "#/components/schemas/PrimDijkstra_output"
             }
           }
         }
@@ -720,7 +720,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/components/schemas/BFS_output"
+              "$ref": "#/components/schemas/Dijkstra_output"
             }
           }
         }
@@ -893,7 +893,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/components/schemas/BFS_output"
+              "$ref": "#/components/schemas/BellmanFord_output"
             }
           }
         }
@@ -917,6 +917,12 @@
         }
       },
       "neighbours": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/vertex"
+        }
+      },
+      "edge": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/vertex"
@@ -972,27 +978,9 @@
       "BFS_step": {
         "type": "object",
         "properties": {
-          "vertices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/vertex"
-            }
-          },
-          "adjacency_list": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/neighbours"
-            }
-          },
-          "current_vertex": {
-            "$ref": "#/components/schemas/vertex"
-          },
-          "parents": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
+          "step_number": {
+            "type": "integer",
+            "format": "int32"
           },
           "visited": {
             "type": "array",
@@ -1001,11 +989,26 @@
               "format": "int32"
             }
           },
-          "queue": {
+          "current_vertex": {
+            "$ref": "#/components/schemas/vertex"
+          },
+          "current_edge": {
+            "$ref": "#/components/schemas/edge"
+          },    
+          "red_edges": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/vertex"
+              "$ref": "#/components/schemas/edge"
             }
+          },    
+          "green_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },
+          "info":{
+            "type": "string"
           }
         }
       },
@@ -1018,27 +1021,9 @@
       "DFS_step": {
         "type": "object",
         "properties": {
-          "vertices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/vertex"
-            }
-          },
-          "adjacency_list": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/neighbours"
-            }
-          },
-          "current_vertex": {
-            "$ref": "#/components/schemas/vertex"
-          },
-          "parents": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
+          "step_number": {
+            "type": "integer",
+            "format": "int32"
           },
           "visited": {
             "type": "array",
@@ -1047,11 +1032,26 @@
               "format": "int32"
             }
           },
-          "stack": {
+          "current_vertex": {
+            "$ref": "#/components/schemas/vertex"
+          },
+          "current_edge": {
+            "$ref": "#/components/schemas/edge"
+          },    
+          "red_edges": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/vertex"
+              "$ref": "#/components/schemas/edge"
             }
+          },    
+          "green_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },
+          "info":{
+            "type": "string"
           }
         }
       },
@@ -1059,6 +1059,139 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/DFS_step"
+        }
+      },
+      "Kruskal_step": {
+        "type": "object",
+        "properties": {
+          "step_number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "current_edge": {
+            "$ref": "#/components/schemas/edge"
+          },    
+          "red_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },    
+          "green_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },
+          "green_vertices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          },
+          "info":{
+            "type": "string"
+          }
+        }
+      },
+      "Kruskal_output": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Kruskal_step"
+        }
+      },
+      "PrimDijkstra_step": {
+        "type": "object",
+        "properties": {
+          "step_number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "current_edge": {
+            "$ref": "#/components/schemas/edge"
+          },    
+          "red_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },    
+          "green_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },
+          "green_vertices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          },
+          "info":{
+            "type": "string"
+          }
+        }
+      },
+      "PrimDijkstra_output": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PrimDijkstra_step"
+        }
+      },
+      "Dijkstra_step": {
+        "type": "object",
+        "properties": {
+          "current_edge": {
+            "$ref": "#/components/schemas/edge"
+          },       
+          "green_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },
+          "green_vertices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/vertex"
+            }
+          },
+          "info":{
+            "type": "string"
+          }
+        }
+      },
+      "Dijkstra_output": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Dijkstra_step"
+        }
+      },
+      "BellmanFord_step": {
+        "type": "object",
+        "properties": {
+          "current_edge": {
+            "$ref": "#/components/schemas/edge"
+          },       
+          "green_edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/edge"
+            }
+          },
+          "current_vertex": {
+            "$ref": "#/components/schemas/vertex"
+          },
+          "info":{
+            "type": "string"
+          }
+        }
+      },
+      "BellmanFord_output": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BellmanFord_step"
         }
       }
     }

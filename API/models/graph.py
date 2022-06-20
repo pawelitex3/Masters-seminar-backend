@@ -52,7 +52,9 @@ class SearchGraph(Graph):
         })
 
     def search(self):
-        "Wykonuje przeszukiwanie zadanego grafu oraz zwraca liste wykonanych krokow."
+        """
+        Wykonuje przeszukiwanie zadanego grafu oraz zwraca liste wykonanych krokow.
+        """
         self.steps = list()
         current_vertex_index = self.vertices.index(self.current_vertex)
         self.collection.put(self.current_vertex)
@@ -257,6 +259,7 @@ class PrimDijkstraGraph(MinimumSpanningTreeGraph):
         n = len(self.vertices)
         self.parents[self.current_vertex] = -2
         step_number = 0
+        sum = 0
 
         for edge in edges:
             index = self.edge_list.index(edge)
